@@ -1,0 +1,6 @@
+{
+  "name": "CalorieSnap",
+  "description": "Capture a photo of food to find out its calories and nutritional value, specializing in Indian and global cuisine.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": []
+}
