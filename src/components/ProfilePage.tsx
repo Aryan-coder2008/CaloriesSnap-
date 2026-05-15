@@ -227,7 +227,7 @@ export default function ProfilePage({ profile, setProfile }: { profile: UserProf
         <ul className="text-sm text-neutral-600 space-y-3 pt-2">
           <li className="flex justify-between border-b border-neutral-50 pb-3">
             <span>Version</span>
-            <span className="font-medium text-neutral-900">1.0.0</span>
+            <span className="font-medium text-neutral-900">1.1.0</span>
           </li>
           <li className="flex justify-between border-b border-neutral-50 pb-3">
             <span>Storage</span>
