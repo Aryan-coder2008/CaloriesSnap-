@@ -2,20 +2,22 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export interface FoodNutrition {
+export interface BaseFoodNutrition {
   foodName: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
+  unitName: string;
+  unitAmount: number;
+  caloriesPerUnitAmount: number;
+  proteinPerUnitAmount: number;
+  carbsPerUnitAmount: number;
+  fatPerUnitAmount: number;
   description: string;
 }
 
-export async function analyzeFoodImage(base64Image: string, mimeType: string): Promise<FoodNutrition> {
+export async function analyzeFoodImage(base64Image: string, mimeType: string): Promise<BaseFoodNutrition> {
   const promptString = `
     Analyze this image of food. Identify the food item(s) present, with a strong knowledge of global cuisine and particularly Indian food (e.g., various curries, breads, sweets, street foods).
-    Provide a realistic estimation of the nutritional content for the portion shown in the image.
-    If multiple items are shown, provide the aggregate nutrition for the entire meal shown.
+    Provide a realistic estimation of the nutritional content for a standard base unit of the item (e.g., '1 piece', '100 grams', '1 glass', '1 serving').
+    If multiple items are shown, you may use '1 plate' or '1 serving' as the unit and provide the aggregate nutrition for that unit.
   `;
 
   try {
@@ -41,34 +43,42 @@ export async function analyzeFoodImage(base64Image: string, mimeType: string): P
               type: Type.STRING,
               description: "Name of the dish/meal",
             },
-            calories: {
-              type: Type.NUMBER,
-              description: "Total estimated calories",
+            unitName: {
+              type: Type.STRING,
+              description: "The name of the unit used for this estimation (e.g., 'piece', 'gram', 'ml', 'glass', 'serving', 'plate', 'cup')",
             },
-            protein: {
+            unitAmount: {
               type: Type.NUMBER,
-              description: "Estimated protein in grams",
+              description: "The amount of the unit the nutrition covers (e.g., 1 for 1 piece, 100 for 100 grams)",
             },
-            carbs: {
+            caloriesPerUnitAmount: {
               type: Type.NUMBER,
-              description: "Estimated carbohydrates in grams",
+              description: "Estimated calories for the specified unit amount",
             },
-            fat: {
+            proteinPerUnitAmount: {
               type: Type.NUMBER,
-              description: "Estimated fat in grams",
+              description: "Estimated protein in grams for the specified unit amount",
+            },
+            carbsPerUnitAmount: {
+              type: Type.NUMBER,
+              description: "Estimated carbohydrates in grams for the specified unit amount",
+            },
+            fatPerUnitAmount: {
+              type: Type.NUMBER,
+              description: "Estimated fat in grams for the specified unit amount",
             },
             description: {
               type: Type.STRING,
               description: "A brief description of what you identified and how you estimated the nutrition.",
             },
           },
-          required: ["foodName", "calories", "protein", "carbs", "fat", "description"],
+          required: ["foodName", "unitName", "unitAmount", "caloriesPerUnitAmount", "proteinPerUnitAmount", "carbsPerUnitAmount", "fatPerUnitAmount", "description"],
         },
       }
     });
 
     if (response.text) {
-      return JSON.parse(response.text.trim()) as FoodNutrition;
+      return JSON.parse(response.text.trim()) as BaseFoodNutrition;
     }
     throw new Error('No response text received');
   } catch (error) {

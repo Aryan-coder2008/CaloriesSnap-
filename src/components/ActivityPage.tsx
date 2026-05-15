@@ -6,9 +6,11 @@ import { estimateExerciseCalories, extractAndEstimateWorkoutPlan } from '../serv
 
 export default function ActivityPage({
   profile,
+  onUpdateProfile,
   onAddExercises,
 }: {
   profile: UserProfile;
+  onUpdateProfile: (p: UserProfile) => void;
   onAddExercises: (exs: Exercise[]) => void;
 }) {
   const [isAddingMode, setIsAddingMode] = useState<'manual' | 'upload' | null>(null);
@@ -25,8 +27,38 @@ export default function ActivityPage({
     }
   };
 
+  const processPlanStr = async (base64Str: string, mimeType: string) => {
+    const weight = profile.weight || 70;
+    const weightUnit = profile.weightUnit || 'kg';
+    
+    const planExercises = await extractAndEstimateWorkoutPlan(
+      base64Str,
+      mimeType,
+      dayQuery,
+      weight,
+      weightUnit
+    );
+
+    if (planExercises.length === 0) {
+      throw new Error('Could not find any exercises for that day in the document.');
+    }
+
+    const newExercises: Exercise[] = planExercises.map((pe, idx) => ({
+      id: Date.now().toString() + idx,
+      timestamp: Date.now(),
+      activityName: pe.activityName,
+      caloriesBurned: pe.caloriesBurned,
+      durationMinutes: pe.durationMinutes,
+    }));
+
+    onAddExercises(newExercises);
+    setIsAddingMode(null);
+    setSelectedFile(null);
+    setDayQuery('');
+  };
+
   const handleUploadEstimate = async () => {
-    if (!selectedFile) {
+    if (!selectedFile && !profile.workoutPlanData) {
       setError('Please select a file first.');
       return;
     }
@@ -39,49 +71,34 @@ export default function ActivityPage({
     setIsEstimating(true);
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        try {
-          const base64String = reader.result as string;
-          const weight = profile.weight || 70;
-          const weightUnit = profile.weightUnit || 'kg';
-          
-          const planExercises = await extractAndEstimateWorkoutPlan(
-            base64String,
-            selectedFile.type,
-            dayQuery,
-            weight,
-            weightUnit
-          );
+      if (selectedFile) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          try {
+            const base64String = reader.result as string;
+            
+            // Save to profile
+            onUpdateProfile({
+              ...profile,
+              workoutPlanData: base64String,
+              workoutPlanMimeType: selectedFile.type
+            });
 
-          if (planExercises.length === 0) {
-            setError('Could not find any exercises for that day in the document.');
+            await processPlanStr(base64String, selectedFile.type);
+          } catch (err: any) {
+            setError(err.message || 'Failed to extract exercises from file.');
             setIsEstimating(false);
-            return;
           }
-
-          const newExercises: Exercise[] = planExercises.map((pe, idx) => ({
-            id: Date.now().toString() + idx,
-            timestamp: Date.now(),
-            activityName: pe.activityName,
-            caloriesBurned: pe.caloriesBurned,
-            durationMinutes: pe.durationMinutes,
-          }));
-
-          onAddExercises(newExercises);
-          setIsAddingMode(null);
-          setSelectedFile(null);
-          setDayQuery('');
-        } catch (err: any) {
-          setError(err.message || 'Failed to extract exercises from file.');
+        };
+        reader.onerror = () => {
+          setError('Failed to read file.');
           setIsEstimating(false);
         }
-      };
-      reader.onerror = () => {
-        setError('Failed to read file.');
-        setIsEstimating(false);
+        reader.readAsDataURL(selectedFile);
+      } else if (profile.workoutPlanData && profile.workoutPlanMimeType) {
+        // Use saved plan
+        await processPlanStr(profile.workoutPlanData, profile.workoutPlanMimeType);
       }
-      reader.readAsDataURL(selectedFile);
     } catch (err: any) {
       setError(err.message || 'Processing failed.');
       setIsEstimating(false);
@@ -142,9 +159,9 @@ export default function ActivityPage({
           >
             <button
               onClick={() => setIsAddingMode('manual')}
-              className="w-full h-48 bg-white border-2 border-dashed border-emerald-200 rounded-3xl flex flex-col items-center justify-center text-emerald-600 hover:bg-emerald-50 hover:border-emerald-400 transition-all group shadow-sm"
+              className="w-full h-48 bg-white border-2 border-dashed border-primary-200 rounded-3xl flex flex-col items-center justify-center text-primary-600 hover:bg-primary-50 hover:border-primary-400 transition-all group shadow-sm"
             >
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
                 <Dumbbell className="w-8 h-8" />
               </div>
               <span className="font-bold text-lg text-neutral-800">Add Manually</span>
@@ -185,7 +202,7 @@ export default function ActivityPage({
                   value={activity} 
                   onChange={e => setActivity(e.target.value)}
                   placeholder="e.g. Running, Weightlifting, Yoga"
-                  className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+                  className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all outline-none"
                 />
               </div>
               <div>
@@ -195,14 +212,14 @@ export default function ActivityPage({
                   value={duration} 
                   onChange={e => setDuration(e.target.value)}
                   placeholder="e.g. 30"
-                  className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+                  className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all outline-none"
                 />
               </div>
               
               <button 
                 onClick={handleEstimate}
                 disabled={isEstimating}
-                className="w-full mt-4 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold py-4 rounded-xl transition-colors"
+                className="w-full mt-4 flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-semibold py-4 rounded-xl transition-colors"
               >
                 {isEstimating ? (
                   <>
@@ -230,13 +247,25 @@ export default function ActivityPage({
             >
               <X className="w-5 h-5" />
             </button>
-            <h2 className="text-xl font-bold text-neutral-800 mb-6">Upload Plan</h2>
+            <h2 className="text-xl font-bold text-neutral-800 mb-6">Extract Schedule</h2>
             
             {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
             
             <div className="space-y-4">
+              {profile.workoutPlanData ? (
+                <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col gap-2">
+                   <div className="flex items-center gap-2 text-blue-700">
+                     <FileText className="w-5 h-5" />
+                     <span className="font-semibold text-sm">Saved Plan Available</span>
+                   </div>
+                   <p className="text-xs text-blue-600/80">We will extract today's plan from your saved document. Alternatively, select a new file below to overwrite.</p>
+                </div>
+              ) : null}
+
               <div>
-                <label className="block text-sm font-semibold text-neutral-700 mb-2">Upload File (PDF/Image)</label>
+                <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                  {profile.workoutPlanData ? "Upload New File (Optional)" : "Upload File (PDF/Image)"}
+                </label>
                 <input 
                   type="file" 
                   accept="application/pdf, image/*"

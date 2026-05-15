@@ -75,6 +75,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
         bmi
       );
       setAnalysis(res);
+      setManualCalories(res.recommendedCalories.toString());
     } catch (err: any) {
       setError(err.message || 'Analysis failed. Please choose manual entry.');
       setStep(3); // go back
@@ -116,7 +117,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
   };
 
   return (
-    <div className="min-h-screen bg-emerald-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-primary-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-3xl shadow-xl overflow-hidden min-h-[500px] flex flex-col p-6 sm:p-8">
         
         <AnimatePresence mode="wait">
@@ -141,7 +142,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
                     value={name} 
                     onChange={e => setName(e.target.value)}
                     placeholder="Enter your name"
-                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all outline-none"
                   />
                 </div>
                 <div>
@@ -151,7 +152,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
                     value={age} 
                     onChange={e => setAge(e.target.value)}
                     placeholder="E.g. 25"
-                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all outline-none"
                   />
                 </div>
               </div>
@@ -159,7 +160,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
               <div className="mt-auto pt-8">
                 <button 
                   onClick={handleNextStep1}
-                  className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-xl transition-colors"
+                  className="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 rounded-xl transition-colors"
                 >
                   Continue <ChevronRight className="w-5 h-5" />
                 </button>
@@ -194,7 +195,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
                     value={weight} 
                     onChange={e => setWeight(e.target.value)}
                     placeholder={`E.g. ${weightUnit === 'kg' ? '70' : '150'}`}
-                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all outline-none"
                   />
                 </div>
 
@@ -212,7 +213,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
                     value={height} 
                     onChange={e => setHeight(e.target.value)}
                     placeholder={`E.g. ${heightUnit === 'cm' ? '175' : '5.9'}`}
-                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 transition-all outline-none"
+                    className="w-full border border-neutral-200 rounded-xl px-4 py-3 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all outline-none"
                   />
                 </div>
               </div>
@@ -226,7 +227,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
                 </button>
                 <button 
                   onClick={handleNextStep2}
-                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-xl transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 rounded-xl transition-colors"
                 >
                   Continue <ChevronRight className="w-5 h-5" />
                 </button>
@@ -242,7 +243,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
               exit={{ opacity: 0, x: -20 }}
               className="flex-1 flex flex-col"
             >
-              <h1 className="text-2xl font-bold text-neutral-900 mb-2 mt-4">Your BMI is <span className="text-emerald-600">{bmi.toFixed(1)}</span></h1>
+              <h1 className="text-2xl font-bold text-neutral-900 mb-2 mt-4">Your BMI is <span className="text-primary-600">{bmi.toFixed(1)}</span></h1>
               <p className="text-neutral-500 mb-8">How would you like to set your daily calorie goal?</p>
 
               {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
@@ -250,10 +251,10 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
               <div className="space-y-4">
                 <button 
                   onClick={handleAnalyze}
-                  className="w-full text-left p-5 border-2 border-emerald-100 hover:border-emerald-500 rounded-2xl bg-emerald-50/50 hover:bg-emerald-50 transition-all group"
+                  className="w-full text-left p-5 border-2 border-primary-100 hover:border-primary-500 rounded-2xl bg-primary-50/50 hover:bg-primary-50 transition-all group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center text-primary-600 group-hover:scale-110 transition-transform">
                       <BrainCircuit className="w-6 h-6" />
                     </div>
                     <div>
@@ -297,30 +298,41 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
             >
               {isAnalyzing ? (
                 <div className="flex flex-col items-center">
-                  <div className="w-20 h-20 border-4 border-emerald-100 border-t-emerald-500 rounded-full animate-spin mb-6"></div>
+                  <div className="w-20 h-20 border-4 border-primary-100 border-t-primary-500 rounded-full animate-spin mb-6"></div>
                   <h2 className="text-xl font-bold text-neutral-800 mb-2">Analyzing your metrics...</h2>
                   <p className="text-neutral-500">Researching optimal calories based on your body condition.</p>
                 </div>
               ) : analysis ? (
                 <div className="w-full">
-                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
                     <Target className="w-8 h-8" />
                   </div>
-                  <h2 className="text-2xl font-bold text-neutral-900 mb-6">Your Plan is Ready</h2>
+                  <h2 className="text-2xl font-bold text-neutral-900 mb-2">Your Plan is Ready</h2>
+                  <p className="text-neutral-500 mb-6 px-4">We've calculated a recommendation for you. You can adjust it below if needed.</p>
                   
                   <div className="bg-neutral-50 rounded-2xl p-6 text-left mb-6 border border-neutral-100 shadow-inner">
                     <p className="text-sm text-neutral-700 leading-relaxed mb-4">
                       {analysis.condition}
                     </p>
-                    <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
-                      <span className="font-semibold text-neutral-600">Daily Target:</span>
-                      <span className="text-2xl font-black text-emerald-600">{analysis.recommendedCalories} <span className="text-sm font-medium">kcal</span></span>
+                    <div className="flex flex-col pt-4 border-t border-neutral-200">
+                      <label className="text-sm font-semibold text-neutral-600 mb-2">Daily Calorie Target</label>
+                      <div className="relative">
+                        <input 
+                          type="number" 
+                          value={manualCalories} 
+                          onChange={e => setManualCalories(e.target.value)}
+                          className="w-full border-2 border-primary-200 rounded-2xl px-6 py-4 bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-50 transition-all outline-none text-3xl font-black text-primary-900"
+                        />
+                        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-neutral-400 font-bold">
+                          kcal
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   <button 
-                    onClick={handleCompleteAnalysis}
-                    className="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-xl transition-colors"
+                    onClick={handleCompleteManual}
+                    className="w-full flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 rounded-xl transition-colors"
                   >
                     Accept & Start Tracking
                   </button>
@@ -350,7 +362,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
                   type="number" 
                   value={manualCalories} 
                   onChange={e => setManualCalories(e.target.value)}
-                  className="w-full border-2 border-emerald-200 rounded-2xl px-6 py-6 bg-emerald-50 focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all outline-none text-4xl font-black text-center text-emerald-900"
+                  className="w-full border-2 border-primary-200 rounded-2xl px-6 py-6 bg-primary-50 focus:bg-white focus:border-primary-500 focus:ring-4 focus:ring-primary-50 transition-all outline-none text-4xl font-black text-center text-primary-900"
                 />
                 <div className="absolute right-6 top-1/2 -translate-y-1/2 text-neutral-400 font-bold">
                   kcal
@@ -366,7 +378,7 @@ export default function OnboardingPage({ onComplete }: { onComplete: (profile: U
                 </button>
                 <button 
                   onClick={handleCompleteManual}
-                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 rounded-xl transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-4 rounded-xl transition-colors"
                 >
                   Start Tracking <ChevronRight className="w-5 h-5" />
                 </button>

@@ -49,7 +49,14 @@ export default function App() {
 
   const saveProfile = (newProfile: UserProfile) => {
     setProfile(newProfile);
-    localStorage.setItem('profile', JSON.stringify(newProfile));
+    try {
+      localStorage.setItem('profile', JSON.stringify(newProfile));
+    } catch (e: any) {
+      console.error('Failed to save profile to localStorage:', e);
+      if (e.name === 'QuotaExceededError') {
+         alert('Local storage quota exceeded. The uploaded workout plan may be too large to save across sessions.');
+      }
+    }
   };
 
   const addMeal = (meal: Meal) => {
@@ -61,6 +68,50 @@ export default function App() {
     saveExercises([...newExs, ...exercises]);
     setActiveTab('history');
   };
+
+  useEffect(() => {
+    if (profile.themeColor) {
+      if (profile.themeColor.startsWith('#')) {
+        document.documentElement.removeAttribute('data-theme');
+        const hex = profile.themeColor.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        
+        const mix = (c1: number, c2: number, w: number) => Math.round(c1 * w + c2 * (1 - w));
+        const shade = (w: number, isDark: boolean) => {
+          const target = isDark ? 0 : 255;
+          return `#${mix(target, r, w).toString(16).padStart(2, '0')}${mix(target, g, w).toString(16).padStart(2, '0')}${mix(target, b, w).toString(16).padStart(2, '0')}`;
+        };
+
+        const root = document.documentElement;
+        root.style.setProperty('--primary-50', shade(0.9, false));
+        root.style.setProperty('--primary-100', shade(0.8, false));
+        root.style.setProperty('--primary-200', shade(0.6, false));
+        root.style.setProperty('--primary-300', shade(0.4, false));
+        root.style.setProperty('--primary-400', shade(0.2, false));
+        root.style.setProperty('--primary-500', profile.themeColor);
+        root.style.setProperty('--primary-600', shade(0.2, true));
+        root.style.setProperty('--primary-700', shade(0.4, true));
+        root.style.setProperty('--primary-800', shade(0.6, true));
+        root.style.setProperty('--primary-900', shade(0.8, true));
+      } else {
+        const root = document.documentElement;
+        ['50','100','200','300','400','500','600','700','800','900'].forEach(s => root.style.removeProperty(`--primary-${s}`));
+        document.documentElement.setAttribute('data-theme', profile.themeColor);
+      }
+    } else {
+      const root = document.documentElement;
+      ['50','100','200','300','400','500','600','700','800','900'].forEach(s => root.style.removeProperty(`--primary-${s}`));
+      document.documentElement.removeAttribute('data-theme');
+    }
+    
+    if (profile.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [profile.themeColor, profile.darkMode]);
 
   // Get only today's data
   const startOfToday = new Date().setHours(0, 0, 0, 0);
@@ -80,7 +131,7 @@ export default function App() {
       case 'snap':
         return <SnapPage onAddMeal={addMeal} />;
       case 'activity':
-        return <ActivityPage profile={profile} onAddExercises={addExercises} />;
+        return <ActivityPage profile={profile} onUpdateProfile={saveProfile} onAddExercises={addExercises} />;
       case 'history':
         return <HistoryPage meals={meals} setMeals={saveMeals} exercises={exercises} setExercises={saveExercises} />;
       case 'profile':
@@ -109,10 +160,10 @@ export default function App() {
 
 function NavItem({ icon, label, isActive, onClick }: { icon: React.ReactNode, label: string, isActive: boolean, onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 ${isActive ? 'text-emerald-600 scale-110 relative' : 'text-neutral-400 hover:text-neutral-600'} transition-all duration-300`}>
+    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 ${isActive ? 'text-primary-600 scale-110 relative' : 'text-neutral-400 hover:text-neutral-600'} transition-all duration-300`}>
       {React.cloneElement(icon as React.ReactElement, { className: 'w-6 h-6' })}
       <span className="text-[10px] font-bold tracking-wide">{label}</span>
-      {isActive && <div className="absolute -bottom-3 w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>}
+      {isActive && <div className="absolute -bottom-3 w-1.5 h-1.5 bg-primary-500 rounded-full"></div>}
     </button>
   );
 }

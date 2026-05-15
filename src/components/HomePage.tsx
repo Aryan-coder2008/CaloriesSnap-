@@ -15,32 +15,26 @@ export default function HomePage({ meals, exercises = [], profile }: { meals: Me
   const remainingCalories = Math.max(0, profile.targetCalories - netCalories);
   
   // Custom Score Calculation (1-10)
-  // based on how much he "should eat" using net calories
   const ratio = netCalories / profile.targetCalories;
+  let score = Math.min(10, Math.round(ratio * 10));
   let scoreText = "";
-  let score = 0;
   
   if (ratio < 0.2) {
-    score = 10;
-    scoreText = "You need to eat a lot more to reach your goal!";
+    scoreText = "You've barely eaten anything yet!";
   } else if (ratio < 0.5) {
-    score = 8;
     scoreText = "You still have plenty of room to eat.";
   } else if (ratio < 0.8) {
-    score = 5;
-    scoreText = "On track, eat a moderate amount.";
+    scoreText = "On track, keep going!";
   } else if (ratio <= 1.0) {
-    score = 2;
     scoreText = "Almost at your limit, maybe a light snack.";
   } else {
-    score = 1;
     scoreText = "You have hit or exceeded your goal! Time to hold off.";
   }
 
   return (
     <div className="p-4 sm:p-6 pb-20 sm:pb-6">
       <header className="mb-6 sm:mb-8 mt-4">
-        <div className="flex items-center gap-2 text-emerald-600 mb-2">
+        <div className="flex items-center gap-2 text-primary-600 mb-2">
           <Utensils className="w-6 h-6" />
           <h1 className="text-xl font-bold tracking-tight">Today's Summary</h1>
         </div>
@@ -50,12 +44,12 @@ export default function HomePage({ meals, exercises = [], profile }: { meals: Me
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-3xl p-6 text-white mb-6 shadow-xl shadow-emerald-600/30"
+        className="bg-gradient-to-br from-primary-500 to-primary-700 rounded-3xl p-6 text-white mb-6 shadow-xl shadow-primary-600/30"
       >
-        <h2 className="text-emerald-100 font-medium mb-1 text-sm uppercase tracking-wider">Eating Score</h2>
+        <h2 className="text-primary-100 font-medium mb-1 text-sm uppercase tracking-wider">Eating Score</h2>
         <div className="flex items-end gap-2 mb-2">
           <span className="text-6xl font-black">{score}</span>
-          <span className="text-xl text-emerald-200 mb-1 font-semibold">/ 10</span>
+          <span className="text-xl text-primary-200 mb-1 font-semibold">/ 10</span>
         </div>
         <p className="text-sm font-medium opacity-90">{scoreText}</p>
         <div className="w-full bg-black/20 h-2 rounded-full mt-5 overflow-hidden">
@@ -66,7 +60,7 @@ export default function HomePage({ meals, exercises = [], profile }: { meals: Me
             className="bg-white h-full" 
           />
         </div>
-        <p className="text-xs text-emerald-100/70 mt-2 text-right">Higher score = eat more</p>
+        <p className="text-xs text-primary-100/70 mt-2 text-right">10/10 = Daily goal reached</p>
       </motion.div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

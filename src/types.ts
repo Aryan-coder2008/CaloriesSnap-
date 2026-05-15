@@ -24,4 +24,9 @@ export interface UserProfile {
   heightUnit?: 'cm' | 'ft';
   bmi?: number;
   isOnboarded?: boolean;
+  themeColor?: string;
+  workoutPlanData?: string;
+  workoutPlanMimeType?: string;
+  darkMode?: boolean;
+  appRating?: number;
 }
